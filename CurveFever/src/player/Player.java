@@ -73,7 +73,7 @@ public class Player implements KeyListener {
 		return false;
 	}
 	
-	private void addNewWall(Wall[][] walls) {
+	private void checkWalls(Wall allWalls) {
 		
 		//Calculate a few points around the player as wall.
 		for(int i=0;i<this.boundries.length;i++) {
@@ -86,7 +86,7 @@ public class Player implements KeyListener {
 					
 			//If a wall already exists, check whether it's freshly added and ours.
 			//If not, make him crash.
-			Wall currentWall = walls[(int)this.boundries[i].getX()][(int)this.boundries[i].getY()];
+			Wall currentWall = allWalls.get((int)this.boundries[i].getX(), (int)this.boundries[i].getY());
 			if(currentWall!=null) {
 				if(currentWall.getPlayerID() == this.getPosition() && (System.currentTimeMillis() - currentWall.getTimestamp())<2000) {
 					continue;
@@ -94,10 +94,11 @@ public class Player implements KeyListener {
 					isOut=true;
 				}
 			}
+			//Else: wall doesn't exist at this point, yet.
 		}
 	}
 	
-	public void move(Rectangle levelBoundries, Wall[][] walls) {
+	public void move(Rectangle levelBoundries, Wall walls) {
 		if(this.isOut) {
 			return;
 		}
@@ -106,10 +107,11 @@ public class Player implements KeyListener {
 		position.setX(position.getX() + velocity * (float)(Math.sin(angle)));
 		position.setY(position.getY() + velocity * (float)(Math.cos(angle)));	
 
+		//Check for bumps after we calculated the newest position.
 		if(this.isExceedingBoundries(levelBoundries)) {
 			return;
 		}
-		this.addNewWall(walls);
+		this.checkWalls(walls);
 	}
 
 /*

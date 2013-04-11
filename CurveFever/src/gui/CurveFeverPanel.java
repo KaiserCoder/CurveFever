@@ -21,7 +21,7 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = -7908762394799897754L;
 	private ArrayList<Player> players = new ArrayList<Player>();
-	private Wall[][] walls;
+	private Wall allWalls;
 	private boolean[] keyStates;
 
 	private final Rectangle gameField = new Rectangle(275, 10, 725, 550);
@@ -36,6 +36,7 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 
 	public CurveFeverPanel() {
 
+		allWalls = new Wall(gameField.x+gameField.width, gameField.y+gameField.height);
 		startButton = new JButton("Start Game");
 		startButton.setBounds(76, 520, 117, 25);
 		
@@ -61,7 +62,7 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 				if(inGame<=1) {
 					drawGameField(graphics);
 					initPlayers();
-					initPlayerWalls();
+					allWalls = new Wall(gameField.x+gameField.width, gameField.y+gameField.height);
 					start = true;
 				}
 			}
@@ -77,7 +78,6 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 
 		//Init everything.
 		initPlayers();
-		initPlayerWalls();
 		timer = new Timer(25, this);
 		timer.start();
 		
@@ -98,19 +98,6 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 		players.add(p2);
 		this.addKeyListener(p1);
 		this.addKeyListener(p2);
-	}
-	/**
-	 * Initialize/reset the player walls
-	 */
-	private void initPlayerWalls() {
-		//Reset every wall there is.
-		walls = new Wall[gameField.width + gameField.x][];
-		for (int i = 0; i < (gameField.width + gameField.x); i++) {
-			walls[i] = new Wall[(gameField.height + gameField.y)];
-			for (int j = 0; j < (gameField.height + gameField.y); j++) {
-				walls[i][j] = null;
-			}
-		}
 	}
 
 	private void drawPlayerRoom(Graphics g) {
@@ -170,7 +157,7 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 	public void addWalls(Player currentPlayer) {
 		PlayerPosition[] pBoundries = currentPlayer.getBoundries();
 		for(int i=0;i<pBoundries.length;i++) {
-			walls[(int)pBoundries[i].getX()][(int)pBoundries[i].getY()] = new Wall(currentPlayer.getPosition(),System.currentTimeMillis());
+			allWalls.add(currentPlayer.getPosition(), pBoundries[i], System.currentTimeMillis());
 		}
 	}
 	/**
@@ -236,7 +223,7 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 		//After going though everything, move the current player
 		//and add walls. Once done, repaint the entire window.
 		for (Player player : players) {
-			player.move(gameField, walls);
+			player.move(gameField, allWalls);
 			addWalls(player);
 		}
 		this.repaint();
