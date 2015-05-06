@@ -3,48 +3,63 @@ package gameplay;
 import player.PlayerPosition;
 
 public class Wall {
+
 	private int playerID;
 	private long timestamp;
 	private Wall[][] walls;
-	
-	//Every wall we want to possibly exist.
-	public Wall( int maxX, int maxY ) {
-		walls = new Wall[maxX][];
-		for(int i=0;i<maxX;i++) {
-			walls[i] = new Wall[maxY];
-			for(int j=0;j<maxY;j++) {
-				walls[i][j] = null;
+
+	public Wall(int maxX, int maxY) {
+		this.walls = new Wall[maxX][];
+		for (int i = 0; i < maxX; i++) {
+			this.walls[i] = new Wall[maxY];
+			for (int j = 0; j < maxY; j++) {
+				this.walls[i][j] = null;
 			}
 		}
 	}
-	
-	//For a single wall - not to be accessed from outside.
-	private Wall( int id, long timeStamp ) {
+
+	private Wall(int id, long timeStamp) {
 		this.playerID = id;
 		this.timestamp = timeStamp;
 	}
-	
-	public void add( int id, PlayerPosition pos, long timeStamp ) {
-		 walls[(int)pos.getX()][(int)pos.getY()] = new Wall(id, timeStamp);
+
+	public void add(int id, PlayerPosition position, long timeStamp) {
+		this.walls[(int) position.getX()][(int) position.getY()] = new Wall(id, timeStamp);
 	}
-	
-	public Wall get( int posX, int posY ) {
-		if(posX < 0 || posY < 0 || posX>walls.length || posY>walls[0].length)
+
+	public Wall get(int posX, int posY) {
+		if (posX < 0 || posY < 0 || posX > this.walls.length || posY > this.walls[0].length) {
 			return null;
-		return walls[posX][posY];
+		}
+
+		return this.walls[posX][posY];
 	}
-	
+
 	public int getPlayerID() {
-		return playerID;
+		return this.playerID;
 	}
+
 	public void setPlayerID(int playerID) {
 		this.playerID = playerID;
 	}
+
 	public long getTimestamp() {
-		return timestamp;
+		return this.timestamp;
 	}
+
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 	
+	public String toString() {
+		String toReturn = "";
+		for (int i = 0; i < this.walls.length; i++) {
+			for (int j = 0; j < this.walls[0].length; j++) {
+				toReturn += this.walls[i][j];
+			}
+			toReturn += "\n";
+		}
+		return toReturn;
+	}
+
 }

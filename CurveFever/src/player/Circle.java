@@ -1,33 +1,39 @@
 package player;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 public class Circle {
-	
+
 	private int radius;
 	private Color color;
-	public Circle(int newRad, Color newCol) {
-		setRadius(newRad);
-		setColor(newCol);
+	
+	private static final short DEFAULT_SIZE = 4;
+
+	public Circle(Color color) {
+		this.radius = DEFAULT_SIZE;
+		this.color = color;
 	}
+
 	public int getRadius() {
-		return radius;
+		return this.radius;
 	}
+
 	public void setRadius(int radius) {
 		this.radius = radius;
 	}
+
 	public Color getColor() {
-		return color;
+		return this.color;
 	}
+
 	public void setColor(Color color) {
 		this.color = color;
 	}
-	
-	public void drawCircle(Graphics g, int x, int y) {
-		Color tmpCol = g.getColor();
-		g.setColor(color);
-		g.fillOval(x-radius, y-radius, 2*radius, 2*radius);
-		g.setColor(tmpCol);
+
+	public void drawCircle(Graphics2D graphics, int x, int y) {
+		graphics.setColor(this.color);
+		graphics.fillOval(x - this.radius, y - this.radius, 2 * this.radius, 2 * this.radius);
 	}
+
 }

@@ -1,16 +1,17 @@
 package player;
 
 public class PlayerPosition {
+
 	private float x;
 	private float y;
-	
-	public PlayerPosition(float xx, float yy) {
-		setX(xx);
-		setY(yy);
+
+	public PlayerPosition(float x, float y) {
+		this.x = x;
+		this.y = y;
 	}
 
 	public float getX() {
-		return x;
+		return this.x;
 	}
 
 	public void setX(float x) {
@@ -18,15 +19,16 @@ public class PlayerPosition {
 	}
 
 	public float getY() {
-		return y;
+		return this.y;
 	}
 
 	public void setY(float y) {
 		this.y = y;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "X: " + x + ", Y: " + y;
+		return "X: " + this.x + ", Y: " + this.y;
 	}
+
 }

@@ -4,7 +4,9 @@ import gameplay.Wall;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -21,170 +23,152 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = -7908762394799897754L;
 	private ArrayList<Player> players = new ArrayList<Player>();
-	private Wall allWalls;
 	private boolean[] keyStates;
+	private Wall allWalls;
 
 	private final Rectangle gameField = new Rectangle(275, 10, 725, 550);
 	private final float ANGLE_DIFF = 0.04f;
 	private long lastTime;
 
+	private Graphics2D graphics;
 	private boolean start;
-	private Graphics graphics;
-	
-	private Timer timer;
+
 	private JButton startButton;
+	private Timer timer;
 
 	public CurveFeverPanel() {
-
-		allWalls = new Wall(gameField.x+gameField.width, gameField.y+gameField.height);
-		startButton = new JButton("Start Game");
-		startButton.setBounds(76, 520, 117, 25);
+		this.allWalls = new Wall(this.gameField.x + this.gameField.width, this.gameField.y + this.gameField.height);
+		this.startButton = new JButton("Start Game");
+		this.startButton.setBounds(76, 520, 117, 25);
 		
-		keyStates = new boolean[256];
-		for(int i=0;i<keyStates.length;i++) {
-			keyStates[i]=false;
+		this.keyStates = new boolean[256];
+		
+		for (int i = 0; i < this.keyStates.length; i++) {
+			this.keyStates[i]=false;
 		}
 		
-		startButton.addActionListener(new ActionListener() {
+		this.startButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				int inGame = 0;
-				//Check every player who's currently playing.
-				if(players.size()>0) {
-					for(Player player : players) {
-						if(!player.isOut()) {
+				if (players.size() > 0) {
+					for (Player player : players) {
+						if (!player.isOut()) {
 							inGame++;
 						}
 					}
 				}
-				//If max 1 player's still alive -> allow rematch.
-				if(inGame<=1) {
-					drawGameField(graphics);
+
+				if (inGame <= 1) {
+					drawGameField();
 					initPlayers();
-					allWalls = new Wall(gameField.x+gameField.width, gameField.y+gameField.height);
+					allWalls = new Wall(gameField.x + gameField.width, gameField.y + gameField.height);
 					start = true;
 				}
 			}
 		});
 
-		//Just to make sure the button doesn't get focused, otherwise KeyListener doesn't work.
-		startButton.setFocusable(false);
+		this.startButton.setFocusable(false);
 		
-		//Focus the panel to ensure KeyListener's functionality.
 		this.setFocusable(true);		
 		this.requestFocus();
-		this.add(startButton);
+		this.add(this.startButton);
 
-		//Init everything.
-		initPlayers();
-		timer = new Timer(25, this);
-		timer.start();
+		this.initPlayers();
+		this.timer = new Timer(25, this);
+		this.timer.start();
 		
-		//Start drawing, mang.
-		start = true;
-
+		this.start = true;
 	}
-	/**
-	 * Initilize/reset the player-base.
-	 */
+
 	private void initPlayers() {
-		//re-add players.
-		players.clear();
-		Player p1 = new Player(Color.red, "DJ Klostermann", 0);
-		Player p2 = new Player(Color.blue, "Sebastian", 1);
+		this.players.clear();
+		
+		Player firstPlayer = new Player(Color.RED, "First Player", 0);
+		Player secondPlayer = new Player(Color.BLUE, "Second Player", 1);
 
-		players.add(p1);
-		players.add(p2);
-		this.addKeyListener(p1);
-		this.addKeyListener(p2);
+		this.players.add(firstPlayer);
+		this.players.add(secondPlayer);
+		
+		this.addKeyListener(firstPlayer);
+		this.addKeyListener(secondPlayer);
 	}
 
-	private void drawPlayerRoom(Graphics g) {
-		Color tmpCol = g.getColor();
-		g.setColor(Color.white);
-		g.fillRect(25, 10, Math.max(g.getClipBounds().width - 800, 200),
-				Math.max(g.getClipBounds().height - 300, 200));
-		for (int i = 0; i < players.size(); i++) {
-			players.get(i).drawPlayerInChat(g);
+	private void drawPlayerRoom() {
+		this.graphics.setColor(Color.WHITE);
+		this.graphics.fillRect(
+			25, 10,
+			Math.max(this.graphics.getClipBounds().width - 800, 200),
+			Math.max(this.graphics.getClipBounds().height - 300, 200)
+		);
+		
+		for (int i = 0; i < this.players.size(); i++) {
+			this.players.get(i).drawPlayerInChat(this.graphics);
 		}
-		g.setColor(tmpCol);
 	}
 
-	private void drawChatBox(Graphics g) {
-		Color tmpCol = g.getColor();
-		g.setColor(Color.WHITE);
-		g.fillRect(25, Math.max(g.getClipBounds().height - 300, 200) + 15,
-				Math.max(g.getClipBounds().width - 800, 200), 250);
-		g.setColor(tmpCol);
+	private void drawChatBox() {
+		this.graphics.setColor(Color.WHITE);
+		this.graphics.fillRect(
+			25,
+			Math.max(this.graphics.getClipBounds().height - 300, 200) + 15,
+			Math.max(this.graphics.getClipBounds().width - 800, 200), 250
+		);
 	}
 
-	private void drawGameField(Graphics g) {
-		Color tmpCol = g.getColor();
-		g.setColor(Color.BLACK);
-		g.fillRect(gameField.x, gameField.y, gameField.width, gameField.height);
-		g.setColor(tmpCol);
+	private void drawGameField() {
+		this.graphics.setColor(Color.BLACK);
+		this.graphics.fillRect(this.gameField.x, this.gameField.y, this.gameField.width, this.gameField.height);
 	}
 
-	private void drawPlayerCircles(Graphics g) {
-		for (int i = 0; i < players.size(); i++) {
-			players.get(i).drawPlayerInGame(g);
-			PlayerPosition[] pBoundries = players.get(i).getBoundries();
-			for(int j=0;j<pBoundries.length;j++) {
-				if(pBoundries[j]==null)
-					continue;
-				g.drawOval((int) pBoundries[j].getX(), (int) pBoundries[j].getY(), 1, 1);
-			}
+	private void drawPlayerCircles() {
+		for (int i = 0; i < this.players.size(); i++) {
+			this.players.get(i).drawPlayerInGame(this.graphics);
 		}
 	}
 
 	@Override
-	public void paintComponent(Graphics g) {
-		graphics = g;
-		// super.paint(g);
-		drawPlayerRoom(g);
-		drawChatBox(g);
-		drawPlayerCircles(g);
-		if(start) {
-			//First time drawing the field.
-			start = false;
-			drawGameField(g);
+	public void paintComponent(Graphics graphics) {
+		this.graphics = (Graphics2D) graphics;
+		this.graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		this.drawChatBox();
+		this.drawPlayerRoom();
+		this.drawPlayerCircles();
+
+		if (this.start) {
+			this.start = false;
+			this.drawGameField();
 		}
 	}
-	/**
-	 * @param currentPlayer Player who creates the wall.
-	 */
+
 	public void addWalls(Player currentPlayer) {
-		PlayerPosition[] pBoundries = currentPlayer.getBoundries();
-		for(int i=0;i<pBoundries.length;i++) {
-			allWalls.add(currentPlayer.getPosition(), pBoundries[i], System.currentTimeMillis());
+		PlayerPosition[] boundries = currentPlayer.getBoundries();
+		for (int i = 0; i < boundries.length;i++) {
+			this.allWalls.add(currentPlayer.getPosition(), boundries[i], System.currentTimeMillis());
 		}
 	}
-	/**
-	 * 
-	 * @param player Current Player.
-	 * @param angleModifier Angle modifier for every time step (e.g. 25ms)
-	 */
+
 	private void handleKeys(Player player, float angleModifier) {
+		boolean[] keyStates = player.getKeyStates();
 		
-		//First player --> LEFT_ARROW/RIGHT_ARROW
-		if(player.getPosition()==0) {
-			keyStates[KeyEvent.VK_LEFT] = player.getKeyStates()[KeyEvent.VK_LEFT];
-			keyStates[KeyEvent.VK_RIGHT] = player.getKeyStates()[KeyEvent.VK_RIGHT];
-			if(keyStates[KeyEvent.VK_LEFT]){
+		if (player.getPosition() == 0) {
+			this.keyStates[KeyEvent.VK_LEFT] = keyStates[KeyEvent.VK_LEFT];
+			this.keyStates[KeyEvent.VK_RIGHT] = keyStates[KeyEvent.VK_RIGHT];
+
+			if (this.keyStates[KeyEvent.VK_LEFT]) {
 				player.setAngle(player.getAngle() + angleModifier);
-			} else if(keyStates[KeyEvent.VK_RIGHT]){
+			} else if(keyStates[KeyEvent.VK_RIGHT]) {
 				player.setAngle(player.getAngle() - angleModifier);
 			}
-		//Second Player --> A / D
-		} else if(player.getPosition()==1) {
-			keyStates[KeyEvent.VK_A] = player.getKeyStates()[KeyEvent.VK_A];
-			keyStates[KeyEvent.VK_D] = player.getKeyStates()[KeyEvent.VK_D];
+		} else if (player.getPosition() == 1) {
+			this.keyStates[KeyEvent.VK_A] = keyStates[KeyEvent.VK_A];
+			this.keyStates[KeyEvent.VK_D] = keyStates[KeyEvent.VK_D];
 				
-			if(keyStates[KeyEvent.VK_A]){
+			if (this.keyStates[KeyEvent.VK_A]) {
 				player.setAngle(player.getAngle() + angleModifier);
-			}
-			else if(keyStates[KeyEvent.VK_D]){
+			} else if (this.keyStates[KeyEvent.VK_D]) {
 				player.setAngle(player.getAngle() - angleModifier);
 			}
 		}	
@@ -194,50 +178,45 @@ public class CurveFeverPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent arg0) {
 		boolean allOut = true;
 
-		//
 		float angleModifier = ANGLE_DIFF;
 		long timeDiff = (System.currentTimeMillis() - lastTime);
+		
 		if (timeDiff > 100) {
 			angleModifier *= 5;
 		}
 		
-		//Handle all polled keys.
-		for( Player player : players ) {
-			handleKeys(player,angleModifier);
+		for (Player player : this.players) {
+			this.handleKeys(player, angleModifier);
 		}
-		
-		//Check whether all players are out of the game.
-		//If so, stop everything.
-		for( Player player : players ) {
-			if(!player.isOut()) {
-				allOut=false;
+
+		for (Player player : this.players) {
+			if (!player.isOut()) {
+				allOut = false;
 				break;
 			}
 		}
-		this.lastTime = System.currentTimeMillis();
-		if(allOut) {
-			//timer.stop();
-			return;
-		}
 		
-		//After going though everything, move the current player
-		//and add walls. Once done, repaint the entire window.
-		for (Player player : players) {
-			player.move(gameField, allWalls);
-			addWalls(player);
+		this.lastTime = System.currentTimeMillis();
+
+		if (!allOut) {
+			for (Player player : this.players) {
+				player.move(this.gameField, this.allWalls);
+				addWalls(player);
+			}
+			this.repaint();
 		}
-		this.repaint();
 	}
 
 	public void addPlayer(Player player) {
-		players.add(player);
+		this.players.add(player);
 	}
 
 	public void removePlayer(Player player) {
-		players.remove(player);
+		this.players.remove(player);
 	}
 
 	public ArrayList<Player> getPlayers() {
-		return players;
+		return this.players;
 	}
+
 }
